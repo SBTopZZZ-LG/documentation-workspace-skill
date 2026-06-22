@@ -8,8 +8,6 @@ This repository is the **source** of the `documentation-workspace` skill. The ar
 
 The skill format (a `SKILL.md` with frontmatter `name` and `description`, plus an `assets/` directory) follows a common convention shared by several agent runtimes (e.g. Kilo, Claude Code, OpenCode, Cursor). The skill itself is agent-agnostic — any runtime that supports this convention can load and run it.
 
-> **Note:** `SKILL.md` lives at the repo root (not in a `skill/` subdirectory) because some skill loaders and registries — Smithery, for one — expect it at the root. Don't move it back.
-
 ## The three-layer architecture
 
 The system has three distinct layers, each with a single responsibility:
