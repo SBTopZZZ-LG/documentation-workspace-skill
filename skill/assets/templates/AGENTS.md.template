@@ -1,0 +1,233 @@
+# Topic
+
+{{TOPIC_SUMMARY}}
+
+---
+
+## Workspace structure
+
+This is a documentation workspace. The directory layout follows GitHub conventions:
+
+- A document with sub-documents is a **folder** named after the document, with a `README.md` inside that contains the document's content. Sub-documents are files or sub-folders inside.
+- A document without sub-documents is a single `.md` file.
+- Sub-document patterns are recursive.
+
+Example:
+
+```text
+<workspace>/
+├── AGENTS.md
+├── README.md
+├── index.yaml
+├── getting-started/             # doc with sub-docs
+│   ├── README.md                # the doc itself
+│   ├── install.md               # sub-doc
+│   └── configure/
+│       ├── README.md            # nested doc
+│       └── env-vars.md
+├── architecture.md              # leaf doc
+└── assets/                      # shared resources (content-addressed)
+    ├── manifest.yaml
+    └── <hash>.<ext>
+```
+
+## File and folder naming
+
+- All lowercase, kebab-case (hyphens, not underscores or spaces)
+- ASCII only
+- Short but descriptive
+- No version suffixes — use Git for history
+
+## Document formats
+
+- **Default**: Markdown (`.md`) for prose
+- **Structured data**: YAML (`.yaml`) for configuration, JSON (`.json`) for interchange
+- **Rendered output**: HTML (`.html`) allowed
+- **Binary resources**: images (`.png`, `.jpg`, `.svg`), PDFs, etc. — stored in `assets/`
+
+## Frontmatter (mandatory for .md, .html, .yaml, .txt; exempt for .json)
+
+Every prose document must have frontmatter at the top. The mandatory fields are:
+
+```yaml
+---
+title: <string>
+summary: <one sentence — not 2, not 3, exactly one>
+status: draft | stable | deprecated
+created: YYYY-MM-DD
+---
+```
+
+- `title`: human-readable title
+- `summary`: exactly one sentence, no exceptions
+- `status`: lifecycle status
+- `created`: creation date in YYYY-MM-DD
+- `updated` is **not** in the frontmatter — derive from file mtime or git history
+- `tags` is **not** in the frontmatter — use `index.yaml` or a `tags.yaml` if grouping is needed
+
+For non-Markdown formats:
+
+- **HTML**: at the very top, an HTML comment block containing the four fields
+- **YAML**: a top-level `metadata:` key with the four fields
+- **Plain text**: a `Key: Value` block at the top, separated from body by a blank line
+
+## Document ordering
+
+Each directory may contain an `index.yaml` listing documents in display order. Empty `index.yaml` means no prescribed order.
+
+```yaml
+# index.yaml — leave empty if no ordering is needed
+documents:
+  - path: getting-started
+    title: Getting Started
+    summary: A 5-minute walkthrough.
+  - path: architecture
+    title: Architecture
+    summary: System design and components.
+```
+
+The `summary` field in `index.yaml` must be a **single sentence**.
+
+## Linking between documents
+
+Use plain Markdown links with relative paths. Always works on any platform that renders Markdown.
+
+```markdown
+See the [Getting Started](getting-started/) guide.
+For details, see [Configuration](getting-started/configure/).
+```
+
+## Assets and resources
+
+- **Per-document assets**: `<doc>/assets/` for resources only one doc uses
+- **Shared assets**: `<workspace>/assets/` for resources used by 2+ docs
+- **Storage**: content-addressed (SHA-256, truncated to 12 hex chars)
+- **Index**: `<workspace>/assets/manifest.yaml` maps logical names to hashes
+
+```yaml
+# assets/manifest.yaml
+assets:
+  onboarding-screenshot: a3f9c1d2e8b4.png
+  api-response-example: 7b2e4f1a9c6d.json
+```
+
+In documents, link to the **resolved path** (write-time resolution):
+
+```markdown
+![Onboarding](../../assets/a3f9c1d2e8b4.png)
+```
+
+Run `npm run hash -- --write <file> --name <logical-name>` to add a new asset. The script computes the hash, writes the file to `assets/`, updates the manifest, and prints the resolved path. Link rewriting across documents is the agent's responsibility (use find-and-replace on the old path).
+
+When a per-doc asset becomes shared, migrate it to `<workspace>/assets/` and update all links.
+
+## Editing strategy
+
+When modifying a document:
+
+1. **Read it first.** Always read the current contents before editing. Do not write blind.
+2. **Prefer partial edits.** Use find-and-replace for small changes, append for additions.
+3. **Whole-file rewrites require a backup.** Before replacing the entire content of a file (or rewriting almost everything — defined as the new content being less than 80% of the original by line count), copy the original to `<filename>.<ext>.bak` first.
+4. **Present the new content.** After a major rewrite, show the user what was written and ask for confirmation before deleting the `.bak` file.
+5. **Never commit `.bak` files.** They are local and temporary.
+
+## Destructive actions
+
+The following actions require **explicit, strict positive confirmation** from the user:
+
+- Deleting any file or folder
+- Moving any file or folder
+- Removing a section from a document
+- Changing a document's `status` to `deprecated`
+- Promoting a single-file document to a folder (this breaks existing links)
+
+The following actions are **allowed without confirmation**:
+
+- Renaming a file or folder
+- Replacing any portion of a document's content (the git diff is the review surface)
+
+**Confirmation protocol:**
+
+- If the user explicitly named the destructive action in their request, treat that as permission. Do not double-confirm. Acknowledge intent: *You said delete `setup.md` — proceeding.*
+- If the user did not name the action, clarify what will be affected, then require strict positive affirmation (`yes`, `y`, `go ahead`, `do it`, `proceed` — NOT `maybe`, `I think so`, `hmm`, etc.).
+
+## Backup and recovery
+
+- **Backups**: created automatically before full rewrites, named `<filename>.<ext>.bak`
+- **Git history**: the primary source of truth for older versions
+- **Restoring from .bak**: rename the `.bak` back to the original name
+- **Cleaning up**: delete `.bak` files once the user confirms the new content is good. They are never committed.
+
+## Commit messages
+
+Use Conventional Commits:
+
+```text
+<type>(<scope>): <subject>
+
+<body — 72 char wrap, explains what & why>
+
+<footer>
+```
+
+Common types in this workspace:
+
+- `docs` — content changes (most common)
+- `feat` — new document or section
+- `fix` — typo, broken link, factual error
+- `refactor` — restructure without content change
+- `style` — formatting-only changes
+- `chore` — renames, moves, housekeeping
+
+- **Subject**: imperative mood, lowercase, no period, max 50 chars
+- **Body**: optional, 72-char wrap, explains what and why
+- **Footer**: `Co-authored-by: AI Agent <agent@local>` for agent-driven commits
+
+## Formatting rules
+
+- **Line length**: 120 characters
+- **Headings**: ATX style (`#`), one H1 per document, no skipped levels
+- **Bold/italic**: `**bold**` / `*italic*` (asterisks only, no underscores)
+- **Lists**: `-` for unordered, `1.` for ordered, 2-space indent
+- **Code blocks**: fenced backticks, language tag required for code
+- **Trailing newline**: one at EOF, no trailing whitespace on lines
+- **Headings**: no trailing punctuation
+- **Images**: alt text required
+
+## Linting
+
+`markdownlint` is configured with the following rules **disabled** (nitpicks):
+
+- `MD013` — line length (Prettier handles)
+- `MD022` — blanks around headings (Prettier handles)
+- `MD024` — multiple headings with same content (acceptable for parallel sections)
+- `MD031` — blanks around code blocks (Prettier handles)
+- `MD033` — inline HTML (used intentionally for HTML doc frontmatter)
+- `MD041` — first line must be a top-level heading (frontmatter is the first thing)
+
+Run `npm run validate` to check, `npm run validate:fix` to autofix.
+
+## Tooling
+
+| Command | Purpose |
+|---|---|
+| `npm run format` | Run Prettier on all `.md`/`.html`/`.json`/`.yaml` files |
+| `npm run format:check` | Check formatting without modifying |
+| `npm run validate` | Run markdownlint |
+| `npm run validate:fix` | Run markdownlint with autofix |
+| `npm run hash -- <file>` | Compute SHA-256 of a file |
+| `npm run hash -- --write <file> --name <name>` | Add an asset: hash, copy to `assets/`, update manifest |
+| `npm run reindex` | Regenerate the auto-index section in `README.md` |
+
+## Loading order (when entering this workspace)
+
+1. Read `AGENTS.md` (this file) — the rules
+2. Read `README.md` — the workspace overview
+3. Read `index.yaml` — the document order
+4. Explore as needed
+
+## Recovery
+
+- **Corrupted or wrong file content**: check for a `.bak` file, restore if present, otherwise use `git log` and `git checkout <commit> -- <file>`.
+- **Broken links**: run `npm run validate` to catch them.
+- **Manifest drift**: walk `assets/` and `manifest.yaml` to detect any assets that aren't in the manifest.

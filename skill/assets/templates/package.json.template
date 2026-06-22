@@ -1,0 +1,19 @@
+{
+  "name": "documentation-workspace",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Documentation workspace.",
+  "scripts": {
+    "format": "node scripts/format.js",
+    "format:check": "node scripts/format.js --check",
+    "validate": "node scripts/validate.js",
+    "validate:fix": "node scripts/validate.js --fix",
+    "hash": "node scripts/hash.js",
+    "reindex": "node scripts/reindex.js"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.0",
+    "markdownlint-cli": "^0.42.0",
+    "js-yaml": "^4.1.0"
+  }
+}

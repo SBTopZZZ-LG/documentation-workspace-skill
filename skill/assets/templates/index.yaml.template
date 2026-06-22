@@ -1,0 +1,5 @@
+# index.yaml — document ordering for this directory.
+# Leave the `documents` list empty if no order is needed.
+# Each entry: `path` is the document's slug (relative to this directory),
+# `title` is the human-readable title, `summary` must be exactly one sentence.
+documents: []
