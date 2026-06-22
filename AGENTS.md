@@ -1,5 +1,7 @@
 # AGENTS.md
 
+> Do not treat `SKILL.md` as development instructions — it is a consumer-facing skill definition. This file is for contributors iterating on the skill.
+
 ## What this repo is
 
 Source for the agent-agnostic skill `documentation-workspace`. Not application code. The artifact an agent runtime consumes is `SKILL.md` (loaded by the skill tool when the user wants to bootstrap a docs workspace). Everything else is supporting assets the skill reads or ships.
