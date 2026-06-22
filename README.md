@@ -70,7 +70,7 @@ Copy or symlink this repo into a location your agent runtime scans for skills. C
 The folder name **must be** `documentation-workspace` — that is the skill's `name` and how the loader matches it.
 
 ```sh
-git clone https://github.com/you/documentation-workspace.git \
+git clone https://github.com/SBTopZZZ-LG/documentation-workspace-skill.git \
   ~/.agent/skills/documentation-workspace
 ```
 
