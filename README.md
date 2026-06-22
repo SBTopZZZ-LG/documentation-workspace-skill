@@ -58,21 +58,15 @@ The underscore-wrapped template filenames (`_foo_.template`) are an **explicit, 
 
 ## How to install
 
-Copy or symlink this repo into a location your agent runtime scans for skills. Common paths:
-
-| Runtime | Path |
-|---|---|
-| Kilo (user-global) | `~/.kilo/skills/documentation-workspace/` |
-| Kilo (project-local) | `<project>/.kilo/skills/documentation-workspace/` |
-| Claude Code (user-global) | `~/.claude/skills/documentation-workspace/` |
-| OpenCode | follow that runtime's skill discovery convention |
-
-The folder name **must be** `documentation-workspace` — that is the skill's `name` and how the loader matches it.
+Install via [Smithery](https://smithery.ai), the cross-runtime skill registry. Replace `<agent>` with your runtime's slug (e.g. `kilo`):
 
 ```sh
-git clone https://github.com/SBTopZZZ-LG/documentation-workspace-skill.git \
-  ~/.agent/skills/documentation-workspace
+smithery skill add https://github.com/SBTopZZZ-LG/documentation-workspace-skill --agent <agent>
 ```
+
+For the list of supported agents and their slug values, see the [Smithery managing-skills reference](https://github.com/mikekelly/managing-skills/blob/main/SKILL.md).
+
+The folder name **must be** `documentation-workspace` — that is the skill's `name` and how the loader matches it.
 
 After install, the skill triggers on phrases like *"set up a docs workspace"*, *"scaffold a docs folder"*, *"organize my notes into folders"*, etc. (see `SKILL.md` for the full description).
 
